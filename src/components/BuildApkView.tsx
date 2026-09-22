@@ -282,23 +282,132 @@ gradlew.bat assembleDebug`}
         </div>
 
         {/* Method 3: GitHub Actions Cloud Build */}
-        <div className="p-5 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+        <div className="p-5 rounded-xl bg-slate-950 border border-slate-800 space-y-4">
           <div className="flex items-center gap-2">
             <span className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">
               3
             </span>
             <h4 className="font-bold text-sm text-white">Method 3: GitHub Actions (Free Cloud Build with No Local Setup)</h4>
+            <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-medium ml-auto">
+              No Android Studio Needed
+            </span>
           </div>
 
-          <div className="text-xs text-slate-300 ml-8 space-y-2 leading-relaxed">
+          <div className="text-xs text-slate-300 ml-0 md:ml-8 space-y-3 leading-relaxed">
             <p>
-              The exported workspace already includes <code className="text-sky-300 font-mono">.github/workflows/build-apk.yml</code> configured for GitHub Actions:
+              The exported workspace includes <code className="text-sky-300 font-mono">.github/workflows/build-apk.yml</code>. Push it to any GitHub repo and GitHub's servers will build your APKs automatically!
             </p>
-            <ol className="list-decimal list-inside space-y-1 text-slate-400">
-              <li>Initialize a git repository (<code className="text-slate-300">git init && git add . && git commit -m "initial"</code>).</li>
-              <li>Push to any GitHub repository.</li>
-              <li>GitHub automatically compiles both APKs on Ubuntu runners with JDK 17 and attaches them as downloadable artifacts under the <strong>Actions</strong> tab.</li>
-            </ol>
+
+            <div className="p-3.5 rounded-lg bg-slate-900 border border-slate-800 space-y-2">
+              <span className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider block">
+                Standard Terminal Commands:
+              </span>
+              <pre className="font-mono text-[11px] text-sky-300 overflow-x-auto leading-relaxed">
+{`# 1. Ensure you are inside the unzipped folder containing 'settings.gradle.kts':
+cd SecureLinkApps
+
+# 2. Stage and commit all files
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/<your-username>/<your-repo>.git
+git push -u origin main`}
+              </pre>
+            </div>
+
+            {/* Troubleshooting pathspec error */}
+            <div className="p-3.5 rounded-lg bg-amber-950/30 border border-amber-600/30 text-amber-200 space-y-2">
+              <div className="font-semibold text-xs flex items-center gap-1.5 text-amber-300">
+                <AlertCircle className="w-4 h-4" />
+                <span>Fixing "fatal: pathspec did not match any files"</span>
+              </div>
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                If <code className="text-amber-300 font-mono">.github/workflows/build-apk.yml</code> is missing (e.g. from an earlier download or hidden folder exclusion), you can create it instantly in your terminal by running this single command:
+              </p>
+              <div className="relative">
+                <pre className="p-2.5 rounded bg-slate-950 border border-slate-800 font-mono text-[11px] text-emerald-400 overflow-x-auto">
+{`mkdir -p .github/workflows && cat << 'EOF' > .github/workflows/build-apk.yml
+name: Build Android APKs
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+      - run: chmod +x gradlew
+      - name: Build AptConnect Client APK
+        run: ./gradlew :clientapp:assembleDebug --stacktrace
+      - name: Build SecureLink Admin APK
+        run: ./gradlew :adminapp:assembleDebug --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aptconnect-debug-apk
+          path: clientapp/build/outputs/apk/debug/*.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: securelink-admin-debug-apk
+          path: adminapp/build/outputs/apk/debug/*.apk
+EOF`}
+                </pre>
+                <button
+                  onClick={() => copyToClipboard(`mkdir -p .github/workflows && cat << 'EOF' > .github/workflows/build-apk.yml
+name: Build Android APKs
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+      - run: chmod +x gradlew
+      - name: Build AptConnect Client APK
+        run: ./gradlew :clientapp:assembleDebug --stacktrace
+      - name: Build SecureLink Admin APK
+        run: ./gradlew :adminapp:assembleDebug --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aptconnect-debug-apk
+          path: clientapp/build/outputs/apk/debug/*.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: securelink-admin-debug-apk
+          path: adminapp/build/outputs/apk/debug/*.apk
+EOF`, 'cmd-create-workflow')}
+                  className="absolute top-2 right-2 p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                  title="Copy command to create workflow file"
+                >
+                  {copiedCommand === 'cmd-create-workflow' ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
