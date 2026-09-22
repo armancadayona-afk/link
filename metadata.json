@@ -1,0 +1,12 @@
+{
+  "name": "SecureLink Mobile Support Suite",
+  "description": "Interactive workspace for SecureLink Admin and AptConnect client apps with real-time camera and screen sharing over WebRTC.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
+
